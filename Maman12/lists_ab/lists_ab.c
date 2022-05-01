@@ -1,8 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-
-#define LINE_LENGTH 8
+#include "lists_ab.h"
 
 /* This program called lists_ab, does the following:
  * 0. Asks user for input.
@@ -14,32 +10,41 @@
 int main() {
     char *listArr = (char *) malloc(LINE_LENGTH * sizeof(char)); /* First line memory allocation */
     char *keep = listArr;
-    char c;
-    int sumChars = 0, sumAlphaNum = 0;
-    int i;
+    sumChars = sumAlphaNum = 0;
 
     printf("Please insert input:\n");
-
     while ((c = getchar()) != EOF){
         sumChars++;
         if (isalnum(c))
             sumAlphaNum++;
         if (sumChars % LINE_LENGTH == 0){ /* increase array size, we've reached limit */
-            keep = realloc(keep, sumChars + LINE_LENGTH);
+            keep = (char *) realloc(keep, (sumChars + LINE_LENGTH) * sizeof(char));
+            listArr = keep + sumChars;
         }
         *listArr++ = c;
     }
+
     if (sumChars % LINE_LENGTH == 0){ /* increase array size, we've reached limit */
-        listArr = realloc(listArr, sumChars + 1);
+        keep = (char *) realloc(keep, (sumChars + 1) * sizeof(char));
+        listArr = keep + sumChars;
     }
-    *listArr = '\0';
-    for (i = 0; i < sumChars; i++){
-        if (i % LINE_LENGTH == 0)
+    *++listArr = '\0';
+
+    printLines(keep);
+    return 0;
+}
+
+void printLines(char *keep){
+    int i, charCount;
+    printf("output:\n");
+    for (i = charCount = 0; i < sumChars; i++, charCount++){
+        if (*keep == '\n')
+            charCount = 0;
+        if ((charCount % LINE_LENGTH) == 0)
             printf("\n");
         printf("%c", *keep++);
     }
-    printf("output: %s\n", keep);
-    printf("sum of all chars: %d\n", sumChars);
-    printf("sum of all alpha-numeric chars: %d\n", sumAlphaNum);
-    return 0;
+    printf("\n\n");
+    printf("Sum of all chars: %d\n", sumChars);
+    printf("Sum of all alpha-numeric chars: %d\n", sumAlphaNum);
 }
