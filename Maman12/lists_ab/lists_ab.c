@@ -12,7 +12,7 @@ int main() {
     char *keep = listArr; /* keep first position of array, to use later for printing */
     sumChars = sumAlphaNum = 0; /* sum counters. */
 
-    printf("Please insert input:\n");
+    printf("Please insert characters input, end it with EOF character (Ctrl+D in Linux):\n");
     while ((c = getchar()) != EOF){
         sumChars++;
         if (isalnum(c))
