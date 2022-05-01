@@ -1,16 +1,16 @@
 #include "lists_ab.h"
 
-/* This program called lists_ab, does the following:
- * 0. Asks user for input.
- * 1. Gets unknown size array of characters, using realloc to increase array size, from stdin (user, file).
- * 2. Print array to output, as lines of fixed length (define LINE_LENGTH).
- * 3. Sum amount of input characters and sum amount of input alpha-numeric characters.
- * 4. Print both sums in an informative manner.
+/* Program lists_ab does the following:
+ * 0. Gets text input from stdin (user of file redirection).
+ * 1. Uses malloc and realloc to initialize and dynamically increase array size to store text.
+ * 2. Prints array to output, as lines of fixed length (define LINE_LENGTH).
+ * 3. Sums amount of input characters and amount of input alpha-numeric characters.
+ * 4. Prints both sums in an informative manner.
  */
 int main() {
     char *listArr = (char *) malloc(LINE_LENGTH * sizeof(char)); /* First line memory allocation */
-    char *keep = listArr;
-    sumChars = sumAlphaNum = 0;
+    char *keep = listArr; /* keep first position of array, to use later for printing */
+    sumChars = sumAlphaNum = 0; /* sum counters. */
 
     printf("Please insert input:\n");
     while ((c = getchar()) != EOF){
@@ -19,12 +19,12 @@ int main() {
             sumAlphaNum++;
         if (sumChars % LINE_LENGTH == 0){ /* increase array size, we've reached limit */
             keep = (char *) realloc(keep, (sumChars + LINE_LENGTH) * sizeof(char));
-            listArr = keep + sumChars;
+            listArr = keep + sumChars - 1; /* Necessary because address of next item might change! */
         }
         *listArr++ = c;
     }
 
-    if (sumChars % LINE_LENGTH == 0){ /* increase array size, we've reached limit */
+    if (sumChars % LINE_LENGTH == 0){ /* increase array size by one if needed, do add '\0' char. */
         keep = (char *) realloc(keep, (sumChars + 1) * sizeof(char));
         listArr = keep + sumChars;
     }
@@ -37,6 +37,7 @@ int main() {
 void printLines(char *keep){
     int i, charCount;
     printf("output:\n");
+    /* We use counter instead of looking for '\0' char because it could exist in some input files, this is safer. */
     for (i = charCount = 0; i < sumChars; i++, charCount++){
         if (*keep == '\n')
             charCount = 0;
