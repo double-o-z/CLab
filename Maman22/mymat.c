@@ -1,23 +1,24 @@
 #include "mat.h"
 
 int main() {
-    /* Declare matrices, matrices pointer array, line string. */
-    mat MAT_A, MAT_B, MAT_C, MAT_D, MAT_E, MAT_F;
-    mat *mats[] = {&MAT_A, &MAT_B, &MAT_C, &MAT_D, &MAT_E, &MAT_F};
-    char c;
+    char *command;
+    char *args;
     char *line = malloc(sizeof(char) * MAX_LINE);
 
     /* Initialize matrices with 0.0 values. */
+    struct matObj mats[6];
     initMats(mats);
-
-    /* Test print MAT_A */
-    printMat(&MAT_A);
 
     /* Get input from user, and while input is received (one line at a time), do commands. */
     while (fgets(line, MAX_LINE, stdin)){
         trimString(line);
         printf("line: %s\n", line);
-        
+        /* Now we have a line like: COMMAND ARG1,ARG2,... */
+        command = strtok(line, " ");
+        args = strtok(NULL, " ");
+        printf("command: %s\n", command);
+        printf("args: %s\n", args);
+        /* processCommand(mats, command, args); */
     }
     return 0;
 }

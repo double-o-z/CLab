@@ -2,28 +2,38 @@
 
 /* initMats: initializes all 6 matrices with 0.0 values.
  * Gets argument matrices pointer array. */
-void initMats(mat *mats[]){
+void initMats(struct matObj mats[]){
     int i, j;
+    char c;
+    struct matObj *matP = mats;
+    for (i = 0; i < 6; i++) {
+        c = 'A' + (matP-mats);
+        matP++;
+        printf("matP.name: %s\n", matP->name);
+        printf("c: %c\n", c);
+    }
     for (i = 0; i < 4; ++i) {
         for (j = 0; j < 4; ++j){
-            mats[0]->arr[i][j] = 0.0;
-            mats[1]->arr[i][j] = 0.0;
-            mats[2]->arr[i][j] = 0.0;
-            mats[3]->arr[i][j] = 0.0;
-            mats[4]->arr[i][j] = 0.0;
-            mats[5]->arr[i][j] = 0.0;
+            mats[0].arr[i][j] = 0;
+            mats[1].arr[i][j] = 0;
+            mats[2].arr[i][j] = 0;
+            mats[3].arr[i][j] = 0;
+            mats[4].arr[i][j] = 0;
+            mats[5].arr[i][j] = 0;
         }
     }
 }
 
 /* printMax: prints a matrix to console.
  * Gets argument matrix pointer */
-void printMat(mat *MAT){
+void printMat(char *mat, struct matObj *mats){
     int i, j;
-    printf("MAT:\n");
+    struct matObj *matP = mats;
+    for (; strcmp(matP->name, mat); matP++)
+        ;
     for (i = 0; i < 4; ++i) {
         for (j = 0; j < 4; ++j){
-            printf("%f ", MAT->arr[i][j]);
+            printf("%f ", matP->arr[i][j]);
         }
         putchar('\n');
     }
@@ -62,11 +72,22 @@ char *trimString(char *s) {
                         p++;
                 }
             }
-            printf("char in s: %c, char is p: %c\n", *s, *p);
+            /* printf("char in s: %c, char is p: %c\n", *s, *p); */
             *s++ = *p++;
         }
         *s = '\0';
         s = keep;
     }
     return (s == original) ? s : memmove(original, s, len + 1);
+}
+
+void processCommand(struct matObj mats[], char *command, char *args){
+    struct matObj *pCase = mats;
+    for (; pCase; pCase++){
+        if (strcmp(pCase->name, command) == 0) {
+            (*pCase->func)(args);
+            break;
+        }
+    }
+
 }
