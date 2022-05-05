@@ -9,7 +9,8 @@ int main() {
     /* Initialize command struct array */
     struct command commands[] = {
             {"read_mat", readMat},
-            {"print_mat", printMat}
+            {"print_mat", printMat},
+            {"add_mat", addMat}
     };
     struct command *comP = commands;
     int comLen = sizeof(commands) / sizeof(struct command);
@@ -35,22 +36,19 @@ int main() {
         }
     }
 
-    /* Test print MAT_A */
-    printMat(mats[0].name, mats);
-
     /* Get input from user, and while input is received (one line at a time), do commands. */
     while (fgets(line, MAX_LINE, stdin)){
         trimString(line);
         /* Now we have a line like: COMMAND ARG1,ARG2,... */
         comName = strtok(line, " ");
-        comArgs = strtok(NULL, ",");
+        comArgs = strtok(NULL, " ");
         if (strcmp(comName, "stop") == 0)
             exit(0);
-        printf("line: %s\n", line);
-        printf("command: %s\n", comName);
-        printf("args: %s\n", comArgs);
+        /* printf("line: %s\n", line); */
+        /* printf("command: %s\n", comName); */
+        /* printf("args: %s\n", comArgs); */
 
-        for (found = 0; (comP - commands) < comLen; comP++){
+        for (comP = commands, found = 0; (comP - commands) < comLen; comP++){
             if (strcmp(comP->name, comName) == 0){
                 found = 1;
                 break;

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <math.h>
 
 #define MAX_LINE 1000
 #define MAT_DIM 4
@@ -21,3 +22,4 @@ Matrix *getMat(Matrix *mats, char *matName);
 
 void readMat(char *args, Matrix *mats);
 void printMat(char *args, Matrix *mats);
+void addMat(char *args, Matrix *mats);

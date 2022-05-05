@@ -56,10 +56,11 @@ Matrix *getMat(Matrix *mats, char *matName){
 void printMat(char *matName, Matrix *mats){
     int i, j;
     Matrix *matP = getMat(mats, matName);
-    printf("Matrix %s:\n", matP->name);
+    /* printf("Matrix %s:\n", matP->name); */
+    putchar('\n');
     for (i = 0; i < 4; ++i) {
         for (j = 0; j < 4; ++j){
-            printf("%.2f\t", matP->arr[i][j]);
+            printf("%6.2f\t", matP->arr[i][j]);
         }
         putchar('\n');
     }
@@ -70,15 +71,41 @@ void readMat(char *args, Matrix *mats){
     int i = 0, j = 0;
     char *valString;
     float val;
+    char *matName;
     Matrix *matP;
-    char *matName = strtok(args, ",");
+    /* printf("args: %s\n", args); */
+    matName = strtok(args, ",");
     matP = getMat(mats, matName);
-    while ((valString = strtok(args, ","))){
+    while ((valString = strtok(NULL, ",")) != NULL){
+        /* printf("remaining args: %s\n",valString); */
         val = atof(valString);
+        /* printf("val: %.2f\n", val); */
         matP->arr[i][j++] = val;
         if (j == MAT_DIM){
             j = 0;
             i++;
         }
     }
+}
+
+void addMat(char *args, Matrix *mats){
+    int i = 0, j = 0;
+    float val;
+    char valString[MAX_LINE];
+    Matrix *matFirstP, *matSecondP;
+    char *matFirst = strtok(args, ",");
+    char *matSecond = strtok(args, ",");
+    char addArgs[MAX_LINE];
+    matFirstP = getMat(mats, matFirst);
+    matSecondP = getMat(mats, matSecond);
+    while (i < MAT_DIM && j < MAT_DIM){
+        val = matFirstP->arr[i][j] + matSecondP->arr[i][j];
+        sprintf(valString, "%.2f", val);
+        strcat(addArgs, valString);
+        if (++j == MAT_DIM){
+            j = 0;
+            i++;
+        }
+    }
+    readMat(addArgs, mats);
 }
