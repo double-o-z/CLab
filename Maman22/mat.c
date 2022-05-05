@@ -57,7 +57,7 @@ void printMat(char *matName, Matrix *mats){
     int i, j;
     Matrix *matP = getMat(mats, matName);
     /* printf("Matrix %s:\n", matP->name); */
-    putchar('\n');
+    printf("\n\t**** %s ****\n", matP->name);
     for (i = 0; i < 4; ++i) {
         for (j = 0; j < 4; ++j){
             printf("%6.2f\t", matP->arr[i][j]);
@@ -88,24 +88,67 @@ void readMat(char *args, Matrix *mats){
     }
 }
 
-void addMat(char *args, Matrix *mats){
+void operandMat(char *args, Matrix *mats, char operand){
     int i = 0, j = 0;
     float val;
     char valString[MAX_LINE];
+    char addArgs[MAX_LINE];
     Matrix *matFirstP, *matSecondP;
     char *matFirst = strtok(args, ",");
-    char *matSecond = strtok(args, ",");
-    char addArgs[MAX_LINE];
+    char *matSecond = strtok(NULL, ",");
+    char *matResult = strtok(NULL, ",");
+
+    /* printf("operand: %c\n", operand); */
+
+    /* printf("matFirst: %s\n", matFirst); */
+    /* printf("matSecond: %s\n", matSecond); */
+    /* printf("matResult: %s\n", matResult); */
+
+    strcpy(addArgs, matResult);
+    strcat(addArgs, ",");
     matFirstP = getMat(mats, matFirst);
     matSecondP = getMat(mats, matSecond);
     while (i < MAT_DIM && j < MAT_DIM){
-        val = matFirstP->arr[i][j] + matSecondP->arr[i][j];
-        sprintf(valString, "%.2f", val);
-        strcat(addArgs, valString);
+        switch (operand) {
+            case '+':
+                /* printf("In +\n"); */
+                val = matFirstP->arr[i][j] + matSecondP->arr[i][j];
+                break;
+            case '-':
+                /* printf("In -\n"); */
+                val = matFirstP->arr[i][j] - matSecondP->arr[i][j];
+                break;
+            case '*':
+                /* printf("In *\n"); */
+                val = matFirstP->arr[i][j] * matSecondP->arr[i][j];
+                break;
+            default:
+                printf("Error, bad command\n");
+                return;
+        }
+        if (val != 0){
+            sprintf(valString, "%.2f", val);
+            strcat(addArgs, valString);
+            strcat(addArgs, ",");
+        }
         if (++j == MAT_DIM){
             j = 0;
             i++;
         }
+        /* printf("addArgs: %s\n", addArgs); */
     }
+    addArgs[strlen(addArgs)-1] = '\0';
     readMat(addArgs, mats);
+}
+
+void addMat(char *args, Matrix *mats){
+    operandMat(args, mats, '+');
+}
+
+void subMat(char *args, Matrix *mats){
+    operandMat(args, mats, '-');
+}
+
+void mulMat(char *args, Matrix *mats){
+    operandMat(args, mats, '*');
 }

@@ -22,4 +22,7 @@ Matrix *getMat(Matrix *mats, char *matName);
 
 void readMat(char *args, Matrix *mats);
 void printMat(char *args, Matrix *mats);
+void operandMat(char *args, Matrix *mats, char operand);
 void addMat(char *args, Matrix *mats);
+void subMat(char *args, Matrix *mats);
+void mulMat(char *args, Matrix *mats);

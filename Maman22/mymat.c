@@ -10,7 +10,9 @@ int main() {
     struct command commands[] = {
             {"read_mat", readMat},
             {"print_mat", printMat},
-            {"add_mat", addMat}
+            {"add_mat", addMat},
+            {"sub_mat", subMat},
+            {"mul_mat", mulMat}
     };
     struct command *comP = commands;
     int comLen = sizeof(commands) / sizeof(struct command);
