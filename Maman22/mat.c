@@ -1,45 +1,5 @@
 #include "mat.h"
 
-/* initMats: initializes all 6 matrices with 0.0 values.
- * Gets argument matrices pointer array. */
-void initMats(struct matObj mats[]){
-    int i, j;
-    char c;
-    struct matObj *matP = mats;
-    for (i = 0; i < 6; i++) {
-        c = 'A' + (matP-mats);
-        matP++;
-        printf("matP.name: %s\n", matP->name);
-        printf("c: %c\n", c);
-    }
-    for (i = 0; i < 4; ++i) {
-        for (j = 0; j < 4; ++j){
-            mats[0].arr[i][j] = 0;
-            mats[1].arr[i][j] = 0;
-            mats[2].arr[i][j] = 0;
-            mats[3].arr[i][j] = 0;
-            mats[4].arr[i][j] = 0;
-            mats[5].arr[i][j] = 0;
-        }
-    }
-}
-
-/* printMax: prints a matrix to console.
- * Gets argument matrix pointer */
-void printMat(char *mat, struct matObj *mats){
-    int i, j;
-    struct matObj *matP = mats;
-    for (; strcmp(matP->name, mat); matP++)
-        ;
-    for (i = 0; i < 4; ++i) {
-        for (j = 0; j < 4; ++j){
-            printf("%f ", matP->arr[i][j]);
-        }
-        putchar('\n');
-    }
-    putchar('\n');
-}
-
 /* Return a pointer to the (shifted) trimmed string. */
 char *trimString(char *s) {
     char *original = s;
@@ -81,13 +41,44 @@ char *trimString(char *s) {
     return (s == original) ? s : memmove(original, s, len + 1);
 }
 
-void processCommand(struct matObj mats[], char *command, char *args){
-    struct matObj *pCase = mats;
-    for (; pCase; pCase++){
-        if (strcmp(pCase->name, command) == 0) {
-            (*pCase->func)(args);
+/* get correct mat pointer */
+Matrix *getMat(Matrix *mats, char *matName){
+    int i;
+    Matrix *matP = mats;
+    for (i =0; i < 6; i++, matP++)  /* Get correct matrix */
+        if (strcmp(matP->name, matName) == 0)
             break;
+    return matP;
+}
+
+/* printMax: prints a matrix to console.
+ * Gets argument matrix pointer */
+void printMat(char *matName, Matrix *mats){
+    int i, j;
+    Matrix *matP = getMat(mats, matName);
+    printf("Matrix %s:\n", matP->name);
+    for (i = 0; i < 4; ++i) {
+        for (j = 0; j < 4; ++j){
+            printf("%.2f\t", matP->arr[i][j]);
+        }
+        putchar('\n');
+    }
+    putchar('\n');
+}
+
+void readMat(char *args, Matrix *mats){
+    int i = 0, j = 0;
+    char *valString;
+    float val;
+    Matrix *matP;
+    char *matName = strtok(args, ",");
+    matP = getMat(mats, matName);
+    while ((valString = strtok(args, ","))){
+        val = atof(valString);
+        matP->arr[i][j++] = val;
+        if (j == MAT_DIM){
+            j = 0;
+            i++;
         }
     }
-
 }

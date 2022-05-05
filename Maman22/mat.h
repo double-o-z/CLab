@@ -4,15 +4,20 @@
 #include <string.h>
 
 #define MAX_LINE 1000
+#define MAT_DIM 4
 
-struct matObj {
-    float arr[4][4];
+typedef struct {
+    char name[5];
+    float arr[MAT_DIM][MAT_DIM];
+} Matrix;
+
+struct command {
     char *name;
-    void (*func)();
+    void (*func)(char * args, Matrix *mats);
 };
 
 char *trimString(char *s);
-void initMats(struct matObj mats[]);
-void readMat(char *args);
-void printMat(char *mat, struct matObj *mats);
-void processCommand(struct matObj mats[], char *command, char *args);
+Matrix *getMat(Matrix *mats, char *matName);
+
+void readMat(char *args, Matrix *mats);
+void printMat(char *args, Matrix *mats);
