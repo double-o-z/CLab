@@ -26,3 +26,5 @@ void operandMat(char *args, Matrix *mats, char operand);
 void addMat(char *args, Matrix *mats);
 void subMat(char *args, Matrix *mats);
 void mulMat(char *args, Matrix *mats);
+void mulScalar(char *args, Matrix *mats);
+void transMat(char *args, Matrix *mats);

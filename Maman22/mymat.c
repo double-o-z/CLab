@@ -12,7 +12,9 @@ int main() {
             {"print_mat", printMat},
             {"add_mat", addMat},
             {"sub_mat", subMat},
-            {"mul_mat", mulMat}
+            {"mul_mat", mulMat},
+            {"mul_scalar", mulScalar},
+            {"trans_mat", transMat}
     };
     struct command *comP = commands;
     int comLen = sizeof(commands) / sizeof(struct command);
