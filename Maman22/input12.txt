@@ -1,0 +1,7 @@
+read_mat MAT_A,1,2,3,4
+read_mat MAT_B,5,6,7,8
+print_mat MAT_A
+print_mat MAT_B
+sub_mat MAT_A, , MAT_B, MAT_C
+print_mat MAT_C
+stop

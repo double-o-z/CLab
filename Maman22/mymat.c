@@ -25,10 +25,11 @@ char *trimString(char *s) {
     /* remove redundant white spaces in the middle. */
     if (*s){
         int firstSpace = 1;
+        int firstComma = 1;
         keep = p = s;
         while (*p){
             if (isspace((unsigned char) *p)){
-                if (firstSpace == 1){
+                if (firstSpace){
                     *p = ' '; /* replace tab with white space for comfort. */
                     firstSpace--;
                 }
@@ -36,6 +37,17 @@ char *trimString(char *s) {
                     while (isspace((unsigned char) *p))
                         p++;
                 }
+            }
+            /* Check for multiple consecutive commas */
+            if (*p == ','){
+                if (firstComma){
+                    firstComma--;
+                } else {
+                    printf("Multiple consecutive commas\n");
+                    return NULL;
+                }
+            } else {
+                firstComma = 1;
             }
             /* printf("char in s: %c, char is p: %c\n", *s, *p); */
             *s++ = *p++;

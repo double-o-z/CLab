@@ -58,7 +58,13 @@ int main(void) {
                 line = keep; /* Revert line pointer back to origin. */
         }
 
-        trimString(line); /* Remove redundant white spaces. */
+        /* Remove redundant white spaces. */
+        if (trimString(line) == NULL){
+            /* If NULL is returned, we have multiple consecutive commas, so we abort command */
+            if (terminal)
+                printf(">>"); /* print prompt to console. */
+            continue;
+        }
         /*printf("line: %s\n", line);*/
         if (strcmp(line, "") == 0){
             if (terminal)
