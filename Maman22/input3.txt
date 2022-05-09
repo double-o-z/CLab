@@ -5,6 +5,4 @@ do_it MAT_B
 print_mat MAT_B
 Add_Mat MAT_A,MAT_B,MAT_C
 print_mat MAT_C
-read_mat MAT_C,1,2,a,3
-print_mat MAT_C
 stop

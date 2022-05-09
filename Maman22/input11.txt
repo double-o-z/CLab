@@ -1,0 +1,5 @@
+read_mat MAT_A,1,2,3,4
+print_mat MAT_A
+trans_mat MAT_A MAT_B
+print_mat MAT_B
+stop

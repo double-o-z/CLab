@@ -1,0 +1,3 @@
+read_mat MAT_C,1,2,
+print_mat MAT_C
+stop

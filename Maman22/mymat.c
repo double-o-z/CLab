@@ -85,27 +85,49 @@ void readMat(char *args, Matrix *mats){
     int i = 0, j = 0, argsCount = 0;
     char *valString, *endOfString;
     double val;
+    double arr[4][4] = {0};
     char *matName;
+    char last;
+    int foundArg = 0;
     Matrix *matP;
+    last = args[strlen(args)-1];
     matName = strtok(args, ",");
     matP = getMat(mats, matName);
     if (matP == NULL)
         return;
+
+    if (!isalnum(last)){ /* If last char of args is not alphanumeric (after white space trim!), we cancel command. */
+        printf("Extraneous text after end of command\n");
+        return;
+    }
     while (argsCount++ < 16){
         val = 0.0;
         if ((valString = strtok(NULL, ",")) != NULL) {
+            if (!foundArg)
+                foundArg = 1;
             val = strtod(valString, &endOfString);
             /*printf("val: %.2f\n", val);*/
             if (endOfString - valString != strlen(valString)){
                 printf("Argument is not a real number\n");
+                return; /* Cancel this command, by returning without setting the matrix. */
+            }
+        } else {
+            if (!foundArg){  /* If we got here, it means 'strtok' returned NULL on the first time, so we cancel. */
+                printf("Missing argument\n");
                 return;
             }
         }
-        matP->arr[i][j++] = val;
+        arr[i][j++] = val;
         if (j == MAT_DIM){
             j = 0;
             i++;
         }
+    }
+    /* Only if all arguments are valid doubles, we insert into the matrix. */
+    /* If even one of the arguments is invalid, the function would return without changing the matrix. */
+    for (i = 0; i < 4; ++i) {
+        for (j = 0; j < 4; ++j)
+            matP->arr[i][j] = arr[i][j];
     }
 }
 
@@ -116,28 +138,58 @@ void operandMats(char *args, Matrix *mats, char operand){
     double val, scalar;
     char valString[MAX_LINE];
     char addArgs[MAX_LINE];
-    char *scalarStr;
+    char *scalarStr, *endOfString;
     Matrix *matFirstP, *matSecondP;
     char *matFirst;
     char *matSecond;
     char *matResult;
+    char *extra;
+
+    if (args[strlen(args)-1] == ','){
+        printf("Extraneous text after end of command\n");
+        return;
+    }
 
     matFirst = strtok(args, ",");
+    if (matFirst == NULL){
+        printf("Missing argument\n");
+        return;
+    }
     matFirstP = getMat(mats, matFirst);
     if (matFirstP == NULL)
         return;
     if (operand == '+' || operand == '-' || operand == '*'){
         matSecond = strtok(NULL, ",");
+        if (matSecond == NULL){
+            printf("Missing argument\n");
+            return;
+        }
         matSecondP = getMat(mats, matSecond);
         if (matSecondP == NULL)
             return;
     } else if (operand == 'S'){
         scalarStr = strtok(NULL, ",");
-        scalar = strtod(scalarStr, NULL);
+        scalar = strtod(scalarStr, &endOfString);
+        if (endOfString - scalarStr != strlen(scalarStr)){
+            printf("Argument is not a scalar\n");
+            return; /* Cancel this command, by returning without setting the matrix. */
+        }
     }
     matResult = strtok(NULL, ",");
-    if (getMat(mats, matFirst) == NULL) /* Checking that result mat is a valid matrix name. */
+    if (matResult == NULL){
+        printf("Missing argument\n");
         return;
+    }
+    if (getMat(mats, matResult) == NULL) /* Checking that result mat is a valid matrix name. */
+        return;
+
+    /* If any more text exists in args, we throw exception as well. */
+    extra = strtok(NULL, "");
+    if (extra != NULL){
+        printf("Extraneous text after end of command\n");
+        return;
+    }
+
     strcpy(addArgs, matResult);
     strcat(addArgs, ",");
 

@@ -67,9 +67,32 @@ int main(void) {
         }
         /* Now we have a line like: COMMAND ARG1,ARG2,... */
         comName = strtok(line, " "); /* Take substring, before first white space. */
+        if (comName[strlen(comName)-1] == ','){
+            printf("Illegal comma\n");
+            if (terminal)
+                printf(">>"); /* print prompt to console. */
+            continue;
+        }
         comArgs = strtok(NULL, " "); /* Take substring, after first white space. */
-        if (strcmp(comName, "stop") == 0)
-            exit(0);
+
+        /* Check if comma exists in args for all commands except print_mat, if not we throw message. */
+        if (comArgs != NULL && strchr(comArgs, ',') == NULL && strcmp(comName, "print_mat") != 0){
+            printf("Missing comma\n");
+            if (terminal)
+                printf(">>"); /* print prompt to console. */
+            continue;
+        }
+        if (strncmp(comName, "stop", 4) == 0){
+            if (strlen(comName) == 4)
+                exit(0);
+            else {
+                printf("Extraneous text after end of command\n");
+                if (terminal)
+                    printf(">>"); /* print prompt to console. */
+                continue;
+            }
+        }
+
 
         /*printf("command: %s\n", comName);*/
         /*printf("args: %s\n", comArgs);*/
