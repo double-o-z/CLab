@@ -1,83 +1,201 @@
-#include "mat.h"
+#include "mymat.h"
 
-int main(void) {
-    char *comName; /* Used to hold command name. */
-    char *comArgs; /* Used to hold rest of command, which is the command arguments string. */
-    char *line = malloc(sizeof(char) * MAX_LINE); /* Used to hold each command string received from input. */
-    int found; /* To signal whether we identify command name from input. */
-    int terminal = 0; /* To signal whether to print prompt, before every command input. */
+/* trimString: returns a pointer to the (shifted) trimmed string.
+ * Removes all leading and trailing white spaces,
+ * and all white spaces between command and arguments (except for the first one).
+ * Example: "    read_mat   MAT_A,  1,2  ,  3   "
+ * Result: "read_mat MAT_A,1,2,3" */
+char *trimString(char *s) {
+    char *original = s;
+    char *p = s;
+    char *keep = s;
+    size_t len = 0;
 
-    /* Initialize command struct array, to be used to match command string to function. */
-    struct command commands[] = {
-            {"read_mat", readMat},
-            {"print_mat", printMat},
-            {"add_mat", addMats},
-            {"sub_mat", subtractMats},
-            {"mul_mat", multiplyMats},
-            {"mul_scalar", multiplyMatByScalar},
-            {"trans_mat", transposeMat}
-    };
-    struct command *comP = commands;
-    int comLen = sizeof(commands) / sizeof(struct command);
-
-    /* Initialize matrices with 0.0 values, and matrix name. */
-    int i, j;
-    Matrix mats[6] = {
-            {"MAT_A"},
-            {"MAT_B"},
-            {"MAT_C"},
-            {"MAT_D"},
-            {"MAT_E"},
-            {"MAT_F"},
-    };
-    for (i = 0; i < 4; ++i) {
-        for (j = 0; j < 4; ++j){
-            mats[0].arr[i][j] = 0;
-            mats[1].arr[i][j] = 0;
-            mats[2].arr[i][j] = 0;
-            mats[3].arr[i][j] = 0;
-            mats[4].arr[i][j] = 0;
-            mats[5].arr[i][j] = 0;
-        }
+    /* remove leading white spaces. */
+    while (isspace((unsigned char) *s)) {
+        s++;
     }
-
-    if ((terminal = isatty(fileno(stdin))))
-        printf(">>"); /* print prompt to console. */
-
-    /* Get input from user, and while input is received (one line at a time), do commands. */
-    while (fgets(line, MAX_LINE, stdin)){
-        trimString(line); /* Remove redundant white spaces. */
-        /*printf("line: %s\n", line);*/
-        if (strcmp(line, "") == 0){
-            if (terminal)
-                printf(">>"); /* print prompt to console. */
-            continue;
+    /* remove trailing white spaces. */
+    if (*s) {
+        while (*p) p++;
+        while (isspace((unsigned char) *(--p)));
+        p[1] = '\0';
+        len = (size_t) (p - s + 1);
+    }
+    /* remove redundant white spaces in the middle. */
+    if (*s){
+        int firstSpace = 1;
+        keep = p = s;
+        while (*p){
+            if (isspace((unsigned char) *p)){
+                if (firstSpace == 1){
+                    *p = ' '; /* replace tab with white space for comfort. */
+                    firstSpace--;
+                }
+                else {
+                    while (isspace((unsigned char) *p))
+                        p++;
+                }
+            }
+            /* printf("char in s: %c, char is p: %c\n", *s, *p); */
+            *s++ = *p++;
         }
-        /* Now we have a line like: COMMAND ARG1,ARG2,... */
-        comName = strtok(line, " "); /* Take substring, before first white space. */
-        comArgs = strtok(NULL, " "); /* Take substring, after first white space. */
-        if (strcmp(comName, "stop") == 0)
-            exit(0);
+        *s = '\0';
+        s = keep;
+    }
+    return (s == original) ? s : memmove(original, s, len + 1);
+}
 
-        /*printf("command: %s\n", comName);*/
-        /*printf("args: %s\n", comArgs);*/
+/* getMat: returns a pointer to given matrix name. */
+Matrix *getMat(Matrix *mats, char *matName){
+    int i;
+    Matrix *matP = mats;
+    for (i =0; i < 6; i++, matP++)  /* Get correct matrix */
+        if (strcmp(matP->name, matName) == 0)
+            break;
+    if (matP - mats > 5) {
+        printf("Undefined matrix name\n");
+        return NULL;
+    }
+    return matP;
+}
 
-        /* Look for function, by command string, if found, set 'found' to 1. */
-        for (comP = commands, found = 0; (comP - commands) < comLen; comP++){
-            if (strcmp(comP->name, comName) == 0){
-                found = 1;
-                break;
+/* printMax: prints a matrix to console.
+ * Gets argument matrix pointer */
+void printMat(char *matName, Matrix *mats){
+    int i, j;
+    Matrix *matP = getMat(mats, matName);
+    if (matP == NULL)
+        return;
+    printf("\n\t\t**** %s ****\n", matP->name);
+    for (i = 0; i < 4; ++i) {
+        putchar('\t');
+        for (j = 0; j < 4; ++j){
+            printf("%7.2f\t", matP->arr[i][j]);
+        }
+        putchar('\n');
+    }
+    putchar('\n');
+}
+
+/* readMat: sets values to a given matrix.
+ * Gets arguments: MATRIX_NAME,VAL1,VAL2,...
+ * (sets between 0 to 16 values, by order of input). */
+void readMat(char *args, Matrix *mats){
+    int i = 0, j = 0, argsCount = 0;
+    char *valString, *endOfString;
+    double val;
+    char *matName;
+    Matrix *matP;
+    matName = strtok(args, ",");
+    matP = getMat(mats, matName);
+    if (matP == NULL)
+        return;
+    while (argsCount++ < 16){
+        val = 0.0;
+        if ((valString = strtok(NULL, ",")) != NULL) {
+            val = strtod(valString, &endOfString);
+            /*printf("val: %.2f\n", val);*/
+            if (endOfString - valString != strlen(valString)){
+                printf("Argument is not a real number\n");
+                return;
             }
         }
-
-        /* If 'found' is 1, we call the function with the args string. */
-        if (found){
-            comP->func(comArgs, mats);  /* comName is valid, lets run the proper command function. */
-        } else {
-            printf("Undefined command name\n");
+        matP->arr[i][j++] = val;
+        if (j == MAT_DIM){
+            j = 0;
+            i++;
         }
-        if (terminal)
-            printf(">>"); /* print prompt to console. */
     }
-    return 0;
+}
+
+/* operandMats: utility function that serves functions: addMat, subMat, mulMat.
+ * Does arithmetic on matrices, with an operand supplied by said functions. */
+void operandMats(char *args, Matrix *mats, char operand){
+    int i = 0, j = 0;
+    double val, scalar;
+    char valString[MAX_LINE];
+    char addArgs[MAX_LINE];
+    char *scalarStr;
+    Matrix *matFirstP, *matSecondP;
+    char *matFirst;
+    char *matSecond;
+    char *matResult;
+
+    matFirst = strtok(args, ",");
+    matFirstP = getMat(mats, matFirst);
+    if (matFirstP == NULL)
+        return;
+    if (operand == '+' || operand == '-' || operand == '*'){
+        matSecond = strtok(NULL, ",");
+        matSecondP = getMat(mats, matSecond);
+        if (matSecondP == NULL)
+            return;
+    } else if (operand == 'S'){
+        scalarStr = strtok(NULL, ",");
+        scalar = strtod(scalarStr, NULL);
+    }
+    matResult = strtok(NULL, ",");
+    if (getMat(mats, matFirst) == NULL) /* Checking that result mat is a valid matrix name. */
+        return;
+    strcpy(addArgs, matResult);
+    strcat(addArgs, ",");
+
+    while (i < MAT_DIM && j < MAT_DIM){
+        switch (operand) {
+            case '+':
+                val = matFirstP->arr[i][j] + matSecondP->arr[i][j];
+                break;
+            case '-':
+                val = matFirstP->arr[i][j] - matSecondP->arr[i][j];
+                break;
+            case '*':
+                val = matFirstP->arr[i][j] * matSecondP->arr[i][j];
+                /* TODO: Fix multiplication. */
+                break;
+            case 'S':
+                val = matFirstP->arr[i][j] * scalar;
+                break;
+            case 'T':
+                val = (i == j) ? matFirstP->arr[i][j] : matFirstP->arr[j][i];
+                break;
+            default:
+                printf("Error, bad command\n");
+                return;
+        }
+        sprintf(valString, "%7.2f", val);
+        strcat(addArgs, valString);
+        strcat(addArgs, ",");
+        if (++j == MAT_DIM){
+            j = 0;
+            i++;
+        }
+    }
+    addArgs[strlen(addArgs)-1] = '\0';
+    readMat(addArgs, mats);
+}
+
+/* addMats: adds all values of matrix1 and matrix2 and sets results into values of matrix3. */
+void addMats(char *args, Matrix *mats){
+    operandMats(args, mats, '+');
+}
+
+/* subtractMats: subtracts all values of matrix2 from matrix1 and sets results into values of matrix3. */
+void subtractMats(char *args, Matrix *mats){
+    operandMats(args, mats, '-');
+}
+
+/* multiplyMats: multiplies matrix1 by matrix2 and sets results into values of matrix3. */
+void multiplyMats(char *args, Matrix *mats){
+    operandMats(args, mats, '*');
+}
+
+/* multiplyMatByScalar: multiplies matrix1 by scalar value (double) and sets results into values of matrix2. */
+void multiplyMatByScalar(char *args, Matrix *mats){
+    operandMats(args, mats, 'S');
+}
+
+/* transposeMat: Transposes matrix1 and sets the new values into matrix2. */
+void transposeMat(char *args, Matrix *mats){
+    operandMats(args, mats, 'T');
 }

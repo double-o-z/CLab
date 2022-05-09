@@ -1,0 +1,10 @@
+read_mat MAT_G,1,2,3
+read_mat mat_a,1,2,3
+read_mat MAT_B,13.4,23.0,-5.3,12,0,0,19.67,14
+do_it MAT_B
+print_mat MAT_B
+Add_Mat MAT_A,MAT_B,MAT_C
+print_mat MAT_C
+read_mat MAT_C,1,2,a,3
+print_mat MAT_C
+stop
