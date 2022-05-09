@@ -1,4 +1,8 @@
+/* To avoid error with implicit declaration of function 'fileno' which is not in C library */
+#define _XOPEN_SOURCE 700
+
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
@@ -9,7 +13,7 @@
 
 typedef struct {
     char name[5];
-    float arr[MAT_DIM][MAT_DIM];
+    double arr[MAT_DIM][MAT_DIM];
 } Matrix;
 
 struct command {
