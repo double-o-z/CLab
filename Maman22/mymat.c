@@ -146,7 +146,7 @@ void readMat(char *args, Matrix *mats){
 /* operandMats: utility function that serves functions: addMat, subMat, mulMat.
  * Does arithmetic on matrices, with an operand supplied by said functions. */
 void operandMats(char *args, Matrix *mats, char operand){
-    int i = 0, j = 0;
+    int i = 0, j = 0, k;
     double val, scalar;
     char valString[MAX_LINE];
     char addArgs[MAX_LINE];
@@ -214,8 +214,10 @@ void operandMats(char *args, Matrix *mats, char operand){
                 val = matFirstP->arr[i][j] - matSecondP->arr[i][j];
                 break;
             case '*':
-                val = matFirstP->arr[i][j] * matSecondP->arr[i][j];
-                /* TODO: Fix multiplication. */
+                /* Sum the multiplication of items on row i on matFirst, and column j on matSecond. */
+                for (val = 0, k = 0; k < 4; k++){
+                    val += matFirstP->arr[i][k] * matSecondP->arr[k][j];
+                }
                 break;
             case 'S':
                 val = matFirstP->arr[i][j] * scalar;

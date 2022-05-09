@@ -1,0 +1,7 @@
+read_mat MAT_A,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
+read_mat MAT_B,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-11,-12,-13,-14,-15,-16
+print_mat MAT_A
+print_mat MAT_B
+mul_mat MAT_A,MAT_B,MAT_C
+print_mat MAT_C
+stop
