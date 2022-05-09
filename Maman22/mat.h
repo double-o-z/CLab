@@ -22,9 +22,9 @@ Matrix *getMat(Matrix *mats, char *matName);
 
 void readMat(char *args, Matrix *mats);
 void printMat(char *args, Matrix *mats);
-void operandMat(char *args, Matrix *mats, char operand);
-void addMat(char *args, Matrix *mats);
-void subMat(char *args, Matrix *mats);
-void mulMat(char *args, Matrix *mats);
-void mulScalar(char *args, Matrix *mats);
-void transMat(char *args, Matrix *mats);
+void operandMats(char *args, Matrix *mats, char operand);
+void addMats(char *args, Matrix *mats);
+void subtractMats(char *args, Matrix *mats);
+void multiplyMats(char *args, Matrix *mats);
+void multiplyMatByScalar(char *args, Matrix *mats);
+void transposeMat(char *args, Matrix *mats);

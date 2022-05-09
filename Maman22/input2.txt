@@ -1,0 +1,5 @@
+read_mat MAT_B,13.4,23.0,-5.3,12,0,0,19.67,14
+print_mat MAT_B
+trans_mat MAT_B,MAT_B
+print_mat MAT_B
+stop

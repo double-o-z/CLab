@@ -3,3 +3,7 @@ Each item in first row of first matrix is multiplied by the relevant item in the
 The multiplications are summed and the value is the item in 0,0 of the result matrix.
 Then each item in first row of first matrix is multiplied by the relevant item in the second column of the second matrix.
 and so forth.
+
+
+
+     batman   1,   2    ,3,4    ,    5      
