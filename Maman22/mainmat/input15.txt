@@ -61,5 +61,6 @@ print_mat MAT_B
 mul_mat MAT_A,MAT_B,MAT_C
 print_mat MAT_C
 print_mat MAT_F
-stop
+st 
+  
 

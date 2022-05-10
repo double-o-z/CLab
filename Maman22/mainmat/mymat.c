@@ -2,6 +2,7 @@
 
 /* To signal whether to print prompt, before every command input. */
 int terminal;
+
 /* trimString: returns a pointer to the (shifted) trimmed string.
  * Removes all leading and trailing white spaces,
  * and all white spaces between command and arguments (except for the first one).
@@ -67,7 +68,7 @@ Matrix *getMat(Matrix *mats, char *matName){
     for (i =0; i < 6; i++, matP++)  /* Get correct matrix */
         if (strcmp(matP->name, matName) == 0)
             break;
-    if (matP - mats > 5) {
+    if (matP - mats > 5) { /* Didn't find matrix by name. */
         printf("Undefined matrix name\n");
         return NULL;
     }
@@ -90,14 +91,14 @@ void prompt(){
  * Gets argument matrix pointer */
 void printMat(char *matName, Matrix *mats){
     int i, j;
-    Matrix *matP = getMat(mats, matName);
-    if (matP == NULL)
+    Matrix *matP = getMat(mats, matName); /* First fetch the matrix by name. */
+    if (matP == NULL) /* Exception was already thrown by getMat, lets return. */
         return;
-    printf("\n\t\t**** %s ****\n", matP->name);
+    printf("\n\t\t**** %s ****\n", matP->name);  /* Print matrix name */
     for (i = 0; i < 4; ++i) {
-        putchar('\t');
+        putchar('\t'); /* Tab at beginning of every row. */
         for (j = 0; j < 4; ++j){
-            printf("%7.2f\t", matP->arr[i][j]);
+            printf("%7.2f\t", matP->arr[i][j]);  /* print double value, with precision 2, and tab. */
         }
         putchar('\n');
     }
@@ -108,42 +109,47 @@ void printMat(char *matName, Matrix *mats){
  * Gets arguments: MATRIX_NAME,VAL1,VAL2,...
  * (sets between 0 to 16 values, by order of input). */
 void readMat(char *args, Matrix *mats){
-    int i = 0, j = 0, argsCount = 0;
-    char *valString, *endOfString;
-    double val;
-    double arr[4][4] = {0};
-    char *matName;
-    char last;
-    int foundArg = 0;
+    int i = 0, j = 0, argsCount = 0, foundArg = 0;
+    char *valString, *endOfString, *matName, last;
+    double val, tempArr[4][4] = {0}; /* temp array to hold values. */
     Matrix *matP;
-    last = args[strlen(args)-1];
-    matName = strtok(args, ",");
-    matP = getMat(mats, matName);
+
+    last = args[strlen(args)-1]; /* get last char in args */
+    matName = strtok(args, ","); /* matrix name. */
+    matP = getMat(mats, matName); /* fetch matrix by name. */
+
+    /* if not found exception was thrown in getMat. */
     if (matP == NULL)
         return;
 
-    if (!isalnum(last)){ /* If last char of args is not alphanumeric (after white space trim!), we cancel command. */
+    /* If last char of args is not alphanumeric (after white space trim), we cancel command. */
+    if (!isalnum(last)){
         printf("Extraneous text after end of command\n");
         return;
     }
-    while (argsCount++ < 16){
-        val = 0.0;
+
+    /* Iterate over all potential args values. */
+    while (argsCount++ < MAT_DIM * MAT_DIM){
+        val = 0.0; /* in case no more values exist in args, we send value 0.0 as default. */
         if ((valString = strtok(NULL, ",")) != NULL) {
+            /* If valString is not null, we found a value, lets set foundArg to True */
             if (!foundArg)
                 foundArg = 1;
-            val = strtod(valString, &endOfString);
-            /*printf("val: %.2f\n", val);*/
+            val = strtod(valString, &endOfString); /* Convert valString to double */
+            /* If valString had chars other than digits, we throw. */
             if (endOfString - valString != strlen(valString)){
                 printf("Argument is not a real number\n");
                 return; /* Cancel this command, by returning without setting the matrix. */
             }
-        } else {
+        } else { /* No more values in args. */
             if (!foundArg){  /* If we got here, it means 'strtok' returned NULL on the first time, so we cancel. */
                 printf("Missing argument\n");
                 return;
             }
         }
-        arr[i][j++] = val;
+        /* If we got here, we should set tempArr with the parsed value. */
+        tempArr[i][j++] = val;
+        /* Increment column until end of column, and then increment row, and reset column. */
         if (j == MAT_DIM){
             j = 0;
             i++;
@@ -153,7 +159,7 @@ void readMat(char *args, Matrix *mats){
     /* If even one of the arguments is invalid, the function would return without changing the matrix. */
     for (i = 0; i < 4; ++i) {
         for (j = 0; j < 4; ++j)
-            matP->arr[i][j] = arr[i][j];
+            matP->arr[i][j] = tempArr[i][j]; /* we copy each value because tempArr is automatic array. */
     }
 }
 
@@ -162,29 +168,28 @@ void readMat(char *args, Matrix *mats){
 void operandMats(char *args, Matrix *mats, char operand){
     int i = 0, j = 0, k;
     double val, scalar;
-    char valString[MAX_LINE];
-    char addArgs[MAX_LINE];
-    char *scalarStr, *endOfString;
     Matrix *matFirstP, *matSecondP;
-    char *matFirst;
-    char *matSecond;
-    char *matResult;
-    char *extra;
+    char valString[MAX_LINE], addArgs[MAX_LINE], *scalarStr,
+    *endOfString, *matFirst, *matSecond, *matResult, *extra;
 
+    /* If trimmed args ends with comma, we throw. */
     if (args[strlen(args)-1] == ','){
         printf("Extraneous text after end of command\n");
         return;
     }
 
+    /* If first matrix argument is not valid, we throw. */
     matFirst = strtok(args, ",");
     if (matFirst == NULL){
         printf("Missing argument\n");
         return;
     }
     matFirstP = getMat(mats, matFirst);
-    if (matFirstP == NULL)
+    if (matFirstP == NULL) /* getMat throws already. */
         return;
-    if (operand == '+' || operand == '-' || operand == '*'){
+
+    if (operand == '+' || operand == '-' || operand == '*'){ /* In these commands, there is a second matrix arg. */
+        /* If second matrix argument is not valid, we throw. */
         matSecond = strtok(NULL, ",");
         if (matSecond == NULL){
             printf("Missing argument\n");
@@ -194,6 +199,7 @@ void operandMats(char *args, Matrix *mats, char operand){
         if (matSecondP == NULL)
             return;
     } else if (operand == 'S'){
+        /* In th command, there is scalar arg, if it is not valid, we throw. */
         scalarStr = strtok(NULL, ",");
         scalar = strtod(scalarStr, &endOfString);
         if (endOfString - scalarStr != strlen(scalarStr)){
@@ -201,12 +207,14 @@ void operandMats(char *args, Matrix *mats, char operand){
             return; /* Cancel this command, by returning without setting the matrix. */
         }
     }
+
+    /* All commands have result matrix. If it is not valid, we throw. */
     matResult = strtok(NULL, ",");
     if (matResult == NULL){
         printf("Missing argument\n");
         return;
     }
-    if (getMat(mats, matResult) == NULL) /* Checking that result mat is a valid matrix name. */
+    if (getMat(mats, matResult) == NULL) /* No need to fetch it, just check its valid. */
         return;
 
     /* If any more text exists in args, we throw exception as well. */
@@ -216,15 +224,20 @@ void operandMats(char *args, Matrix *mats, char operand){
         return;
     }
 
+    /* Prepare args for readMat in the end. */
     strcpy(addArgs, matResult);
     strcat(addArgs, ",");
 
+    /* Iterate over columns and row of arg matrix\matrices. */
     while (i < MAT_DIM && j < MAT_DIM){
+        /* Perform logic of commands, depending on operand supplied. */
         switch (operand) {
             case '+':
+                /* Add matrices values. */
                 val = matFirstP->arr[i][j] + matSecondP->arr[i][j];
                 break;
             case '-':
+                /* Subtract matrices values. */
                 val = matFirstP->arr[i][j] - matSecondP->arr[i][j];
                 break;
             case '*':
@@ -234,23 +247,32 @@ void operandMats(char *args, Matrix *mats, char operand){
                 }
                 break;
             case 'S':
+                /* Multiply arg matrix values by arg scalar */
                 val = matFirstP->arr[i][j] * scalar;
                 break;
             case 'T':
+                /* Transpose arg matrix values. */
                 val = (i == j) ? matFirstP->arr[i][j] : matFirstP->arr[j][i];
                 break;
             default:
+                /* Throw, bad command. */
                 printf("Error, bad command\n");
                 return;
         }
+
+        /* Prepare args for readMat. Insert all calculated values to args string. */
         sprintf(valString, "%7.2f", val);
         strcat(addArgs, valString);
         strcat(addArgs, ",");
+
+        /* Control the iteration of matrix columns and rows. */
         if (++j == MAT_DIM){
             j = 0;
             i++;
         }
     }
+
+    /* Now that args string is ready, we call our readMat function with args. */
     addArgs[strlen(addArgs)-1] = '\0';
     readMat(addArgs, mats);
 }

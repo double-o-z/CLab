@@ -1,4 +1,4 @@
-/* To avoid error with implicit declaration of function 'fileno' which is not in C library */
+/* To avoid error with implicit declaration of function 'fileno' which is not in C library: */
 #define _XOPEN_SOURCE 700
 
 #include <stdio.h>

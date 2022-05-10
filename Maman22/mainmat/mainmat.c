@@ -146,8 +146,5 @@ int main(void) {
         keep = (char *) realloc(keep, ((lineCount+1) * MAX_LINE) * sizeof(char));
     }
     printf("Error: did not receive 'stop' command.\n");
-    /* TODO: add comments,
-     * TODO: create utility functions where possible, create photos of runs, with redirection and user.
-     * TODO: ZIP and send. */
     return 1;
 }
