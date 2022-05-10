@@ -23,6 +23,8 @@ struct command {
 
 char *trimString(char *s);
 Matrix *getMat(Matrix *mats, char *matName);
+void testTerminal(void);
+void prompt(void);
 
 void readMat(char *args, Matrix *mats);
 void printMat(char *args, Matrix *mats);

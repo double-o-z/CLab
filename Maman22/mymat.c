@@ -1,5 +1,7 @@
 #include "mymat.h"
 
+/* To signal whether to print prompt, before every command input. */
+int terminal;
 /* trimString: returns a pointer to the (shifted) trimmed string.
  * Removes all leading and trailing white spaces,
  * and all white spaces between command and arguments (except for the first one).
@@ -70,6 +72,18 @@ Matrix *getMat(Matrix *mats, char *matName){
         return NULL;
     }
     return matP;
+}
+
+/* testTerminal: determines if program runs from console or file redirection.
+ * Sets terminal to True if it runs from console, and False if it runs from file redirection. */
+void testTerminal(void){
+    terminal = isatty(fileno(stdin));
+}
+
+/* prompt: prints '>>' to console, if program runs on console and not file redirection. */
+void prompt(){
+    if (terminal)
+        printf(">>"); /* print prompt to console. */
 }
 
 /* printMax: prints a matrix to console.

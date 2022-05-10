@@ -1,13 +1,12 @@
 #include "mymat.h"
 
 int main(void) {
-    char *comName; /* Used to hold command name. */
-    char *comArgs; /* Used to hold rest of command, which is the command arguments string. */
+    char *comName, *comNameP; /* Used to hold command name. */
+    char *comArgs, *comArgsP; /* Used to hold rest of command, which is the command arguments string. */
     char *line = malloc(sizeof(char) * MAX_LINE); /* Used to hold each command string received from input. */
-    char *keep = line;
+    char *keep = line;  /* Keep initial index of line memory. */
     int found; /* To signal whether we identify command name from input. */
-    int terminal = 0; /* To signal whether to print prompt, before every command input. */
-    int lineCount = 0;
+    int lineCount = 0; /* Used to determine memory reallocation. */
 
     /* Initialize command struct array, to be used to match command string to function. */
     struct command commands[] = {
@@ -19,91 +18,113 @@ int main(void) {
             {"mul_scalar", multiplyMatByScalar},
             {"trans_mat", transposeMat}
     };
-    struct command *comP = commands;
-    int comLen = sizeof(commands) / sizeof(struct command);
+    struct command *comP; /* We use this pointer to traverse commands array. */
+    int comLen = sizeof(commands) / sizeof(struct command); /* Calculate length of commands array safely. */
 
-    /* Initialize matrices with 0.0 values, and matrix name. */
-    int i, j;
+    /* Initialize matrices with 0.0 values, and matrix names. */
     Matrix mats[6] = {
-            {"MAT_A"},
-            {"MAT_B"},
-            {"MAT_C"},
-            {"MAT_D"},
-            {"MAT_E"},
-            {"MAT_F"},
+            {"MAT_A", {{0}}},
+            {"MAT_B", {{0}}},
+            {"MAT_C", {{0}}},
+            {"MAT_D", {{0}}},
+            {"MAT_E", {{0}}},
+            {"MAT_F", {{0}}},
     };
-    for (i = 0; i < 4; ++i) {
-        for (j = 0; j < 4; ++j){
-            mats[0].arr[i][j] = 0;
-            mats[1].arr[i][j] = 0;
-            mats[2].arr[i][j] = 0;
-            mats[3].arr[i][j] = 0;
-            mats[4].arr[i][j] = 0;
-            mats[5].arr[i][j] = 0;
-        }
-    }
 
-    if ((terminal = isatty(fileno(stdin))))
-        printf(">>"); /* print prompt to console. */
+    /* In order to print prompt to screen, we determine if program is run from console or file redirection. */
+    testTerminal();
+    prompt(); /* print prompt to console if necessary. */
 
-    /* Get input from user, and while input is received (one line at a time), do commands. */
+    /* Get input from user, and while input is received (one line at a time, ends with '\n'), do commands. */
     while (fgets(line, MAX_LINE, stdin)){
         lineCount++;
         if (line[strlen(line)-1] != '\n'){ /* Increase size of line, to accommodate rest of string, until '\n'. */
             keep = (char *) realloc(keep, ((lineCount+1) * MAX_LINE) * sizeof(char));
-            line = keep + MAX_LINE - 1; /* Increment line pointer by MAX_LINE, to insert next characters. */
-            continue;
-        } else {
-            if (strlen(keep) > MAX_LINE)
+            line = keep + MAX_LINE - 1; /* Reset line pointer, after reallocation to correct place. */
+            continue; /* continue, to get rest of line into memory. */
+        } else {  /* We finished getting whole line into memory. */
+            if (strlen(keep) > MAX_LINE) /* If true, the whole line is more than MAX_LINE. */
                 line = keep; /* Revert line pointer back to origin. */
         }
 
-        /* Remove redundant white spaces. */
+        /* Remove redundant white spaces, and convert first white space to ' ' for comfort. */
         if (trimString(line) == NULL){
             /* If NULL is returned, we have multiple consecutive commas, so we abort command */
-            if (terminal)
-                printf(">>"); /* print prompt to console. */
+            prompt(); /* print prompt to console if necessary. */
             continue;
         }
-        /*printf("line: %s\n", line);*/
+
+        /* In case we received empty line (just '\n'), simply print prompt, and handle next command line. */
         if (strcmp(line, "") == 0){
-            if (terminal)
-                printf(">>"); /* print prompt to console. */
+            prompt(); /* print prompt to console if necessary. */
             continue;
         }
-        /* Now we have a line like: COMMAND ARG1,ARG2,... */
+
+        /* Now we have a line potentially like: "COMMAND_NAME ARG1,ARG2,..." */
         comName = strtok(line, " "); /* Take substring, before first white space. */
+
+        /* If command ends with comma, we throw exception. */
         if (comName[strlen(comName)-1] == ','){
             printf("Illegal comma\n");
-            if (terminal)
-                printf(">>"); /* print prompt to console. */
+            prompt(); /* print prompt to console if necessary. */
             continue;
         }
-        comArgs = strtok(NULL, " "); /* Take substring, after first white space. */
 
-        /* Check if comma exists in args for all commands except print_mat, if not we throw message. */
-        if (comArgs != NULL && strchr(comArgs, ',') == NULL && strcmp(comName, "print_mat") != 0){
-            printf("Missing comma\n");
-            if (terminal)
-                printf(">>"); /* print prompt to console. */
-            continue;
-        }
-        if (strncmp(comName, "stop", 4) == 0){
-            if (strlen(comName) == 4)
+        /* Take substring, after first white space. This string will be arguments for the command. */
+        comArgs = strtok(NULL, " ");
+
+        /* Handle stop condition for program. */
+        if (strncmp(comName, "stop", 4) == 0){ /* Starts with 'stop'. */
+            if (strlen(comName) == 4 && comArgs == NULL) /* Valid stop command, bye bye. */
                 exit(0);
-            else {
+            else { /* if command starts with stop, but has more characters or arguments, we throw. */
                 printf("Extraneous text after end of command\n");
-                if (terminal)
-                    printf(">>"); /* print prompt to console. */
+                prompt(); /* print prompt to console if necessary. */
                 continue;
             }
         }
 
+        /* Check if uppercase chars in command name */
+        for (comNameP = comName; *comNameP != '\0'; comNameP++){
+            if (isupper(*comNameP)){ /* Uppercase chars not allowed in command name, throw. */
+                break;
+            }
+        }
+        if (*comNameP != '\0'){
+            printf("Uppercase chars not allowed in command name.\n");
+            prompt();
+            continue;
+        }
 
-        /*printf("command: %s\n", comName);*/
-        /*printf("args: %s\n", comArgs);*/
+        /* Check if lowercase chars in command args */
+        if (comArgs != NULL){
+            for (comArgsP = comArgs; *comArgsP != '\0'; comArgsP++){
+                if (islower(*comArgsP)){ /* Lowercase chars not allowed in command args, throw. */
+                    break;
+                }
+            }
+            if (*comArgsP != '\0'){
+                printf("Lowercase chars not allowed in command args.\n");
+                prompt();
+                continue;
+            }
+        }
 
-        /* Look for function, by command string, if found, set 'found' to 1. */
+        /* If no arguments are supplied, and command is not 'stop', we throw exception. */
+        if (comArgs == NULL && strcmp(comName, "stop") != 0){
+            printf("Missing argument\n");
+            prompt(); /* print prompt to console if necessary. */
+            continue;
+        }
+
+        /* Check if comma exists in args for all commands except print_mat, if not we throw message. */
+        if (comArgs != NULL && strchr(comArgs, ',') == NULL && strcmp(comName, "print_mat") != 0){
+            printf("Missing comma\n");
+            prompt(); /* print prompt to console if necessary. */
+            continue;
+        }
+
+        /* Look for function, by command name, if found, set 'found' to 1. */
         for (comP = commands, found = 0; (comP - commands) < comLen; comP++){
             if (strcmp(comP->name, comName) == 0){
                 found = 1;
@@ -115,14 +136,18 @@ int main(void) {
         if (found){
             comP->func(comArgs, mats);  /* comName is valid, lets run the proper command function. */
         } else {
-            printf("Undefined command name\n");
+            printf("Undefined command name\n"); /* Unrecognized command name, throw. */
         }
-        if (terminal)
-            printf(">>"); /* print prompt to console. */
 
+        prompt(); /* print prompt to console if necessary. */
+
+        /* Reset line counter, and decrease memory size to MAX_LINE */
         lineCount = 0;
         keep = (char *) realloc(keep, ((lineCount+1) * MAX_LINE) * sizeof(char));
     }
     printf("Error: did not receive 'stop' command.\n");
+    /* TODO: add comments,
+     * TODO: create utility functions where possible, create photos of runs, with redirection and user.
+     * TODO: ZIP and send. */
     return 1;
 }
