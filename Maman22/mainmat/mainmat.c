@@ -75,8 +75,11 @@ int main(void) {
 
         /* Handle stop condition for program. */
         if (strncmp(comName, "stop", 4) == 0){ /* Starts with 'stop'. */
-            if (strlen(comName) == 4 && comArgs == NULL) /* Valid stop command, bye bye. */
+            if (strlen(comName) == 4 && comArgs == NULL){ /* Valid stop command, bye bye. */
+                free(keep);
                 exit(0);
+            }
+
             else { /* if command starts with stop, but has more characters or arguments, we throw. */
                 printf("Extraneous text after end of command\n");
                 prompt(); /* print prompt to console if necessary. */
@@ -146,5 +149,6 @@ int main(void) {
         keep = (char *) realloc(keep, ((lineCount+1) * MAX_LINE) * sizeof(char));
     }
     printf("Error: did not receive 'stop' command.\n");
+    free(keep);
     return 1;
 }
