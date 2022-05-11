@@ -40,7 +40,7 @@ int main(void) {
         lineCount++;
         if (line[strlen(line)-1] != '\n'){ /* Increase size of line, to accommodate rest of string, until '\n'. */
             keep = (char *) realloc(keep, ((lineCount+1) * MAX_LINE) * sizeof(char));
-            line = keep + MAX_LINE - 1; /* Reset line pointer, after reallocation to correct place. */
+            line = keep + (lineCount * MAX_LINE) - 1; /* Reset line pointer, after reallocation to correct place. */
             continue; /* continue, to get rest of line into memory. */
         } else {  /* We finished getting whole line into memory. */
             if (strlen(keep) > MAX_LINE) /* If true, the whole line is more than MAX_LINE. */
