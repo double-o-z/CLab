@@ -3,10 +3,9 @@
 int main(void) {
     char *comName, *comNameP; /* Used to hold command name. */
     char *comArgs, *comArgsP; /* Used to hold rest of command, which is the command arguments string. */
-    char *line = malloc(sizeof(char) * MAX_LINE); /* Used to hold each command string received from input. */
-    char *keep = line;  /* Keep initial index of line memory. */
     int found; /* To signal whether we identify command name from input. */
-    int lineCount = 0; /* Used to determine memory reallocation. */
+    char *line = NULL;
+    size_t n; /* for getline function. */
 
     /* Initialize command struct array, to be used to match command string to function. */
     struct command commands[] = {
@@ -36,17 +35,7 @@ int main(void) {
     prompt(); /* print prompt to console if necessary. */
 
     /* Get input from user, and while input is received (one line at a time, ends with '\n'), do commands. */
-    while (fgets(line, MAX_LINE, stdin)){
-        lineCount++;
-        if (line[strlen(line)-1] != '\n'){ /* Increase size of line, to accommodate rest of string, until '\n'. */
-            keep = (char *) realloc(keep, ((lineCount+1) * MAX_LINE) * sizeof(char));
-            line = keep + MAX_LINE - 1; /* Reset line pointer, after reallocation to correct place. */
-            continue; /* continue, to get rest of line into memory. */
-        } else {  /* We finished getting whole line into memory. */
-            if (strlen(keep) > MAX_LINE) /* If true, the whole line is more than MAX_LINE. */
-                line = keep; /* Revert line pointer back to origin. */
-        }
-
+    while (getline(&line, &n, stdin)){
         /* Remove redundant white spaces, and convert first white space to ' ' for comfort. */
         if (trimString(line) == NULL){
             /* If NULL is returned, we have multiple consecutive commas, so we abort command */
@@ -76,7 +65,7 @@ int main(void) {
         /* Handle stop condition for program. */
         if (strncmp(comName, "stop", 4) == 0){ /* Starts with 'stop'. */
             if (strlen(comName) == 4 && comArgs == NULL){ /* Valid stop command, bye bye. */
-                free(keep);
+                free(line);
                 exit(0);
             }
 
@@ -143,12 +132,8 @@ int main(void) {
         }
 
         prompt(); /* print prompt to console if necessary. */
-
-        /* Reset line counter, and decrease memory size to MAX_LINE */
-        lineCount = 0;
-        keep = (char *) realloc(keep, ((lineCount+1) * MAX_LINE) * sizeof(char));
     }
     printf("Error: did not receive 'stop' command.\n");
-    free(keep);
+    free(line);
     return 1;
 }
