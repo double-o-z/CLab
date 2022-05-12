@@ -1,8 +1,4 @@
-/* To avoid error with implicit declaration of function 'fileno' which is not in C library: */
-#define _XOPEN_SOURCE 700
-
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
@@ -23,7 +19,6 @@ struct command {
 
 char *trimString(char *s);
 Matrix *getMat(Matrix *mats, char *matName);
-void testTerminal(void);
 void prompt(void);
 
 void readMat(char *args, Matrix *mats);

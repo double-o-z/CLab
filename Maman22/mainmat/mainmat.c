@@ -31,9 +31,7 @@ int main(void) {
             {"MAT_F", {{0}}},
     };
 
-    /* In order to print prompt to screen, we determine if program is run from console or file redirection. */
-    testTerminal();
-    prompt(); /* print prompt to console if necessary. */
+    prompt(); /* print prompt to console. */
 
     /* Get input from user, and while input is received (one line at a time, ends with '\n'), do commands. */
     while (fgets(line, MAX_LINE, stdin)){
@@ -50,13 +48,13 @@ int main(void) {
         /* Remove redundant white spaces, and convert first white space to ' ' for comfort. */
         if (trimString(line) == NULL){
             /* If NULL is returned, we have multiple consecutive commas, so we abort command */
-            prompt(); /* print prompt to console if necessary. */
+            prompt(); /* print prompt to console. */
             continue;
         }
 
         /* In case we received empty line (just '\n'), simply print prompt, and handle next command line. */
         if (strcmp(line, "") == 0){
-            prompt(); /* print prompt to console if necessary. */
+            prompt(); /* print prompt to console. */
             continue;
         }
 
@@ -66,7 +64,7 @@ int main(void) {
         /* If command ends with comma, we throw exception. */
         if (comName[strlen(comName)-1] == ','){
             printf("Illegal comma\n");
-            prompt(); /* print prompt to console if necessary. */
+            prompt(); /* print prompt to console. */
             continue;
         }
 
@@ -82,7 +80,7 @@ int main(void) {
 
             else { /* if command starts with stop, but has more characters or arguments, we throw. */
                 printf("Extraneous text after end of command\n");
-                prompt(); /* print prompt to console if necessary. */
+                prompt(); /* print prompt to console. */
                 continue;
             }
         }
@@ -116,14 +114,14 @@ int main(void) {
         /* If no arguments are supplied, and command is not 'stop', we throw exception. */
         if (comArgs == NULL && strcmp(comName, "stop") != 0){
             printf("Missing argument\n");
-            prompt(); /* print prompt to console if necessary. */
+            prompt(); /* print prompt to console. */
             continue;
         }
 
         /* Check if comma exists in args for all commands except print_mat, if not we throw message. */
         if (comArgs != NULL && strchr(comArgs, ',') == NULL && strcmp(comName, "print_mat") != 0){
             printf("Missing comma\n");
-            prompt(); /* print prompt to console if necessary. */
+            prompt(); /* print prompt to console. */
             continue;
         }
 
@@ -142,7 +140,7 @@ int main(void) {
             printf("Undefined command name\n"); /* Unrecognized command name, throw. */
         }
 
-        prompt(); /* print prompt to console if necessary. */
+        prompt(); /* print prompt to console. */
 
         /* Reset line counter, and decrease memory size to MAX_LINE */
         lineCount = 0;
